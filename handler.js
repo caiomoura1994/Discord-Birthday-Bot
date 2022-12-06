@@ -6,9 +6,12 @@ const app = express();
 
 app.use(express.json());
 
+app.get("/users/ok", async function (req, res) {
+  res.json({ ok: true })
+});
 app.get("/users/:userId", async function (req, res) {
   try {
-    const findedUser = await UsersModel.get(Number(req.params.userId))
+    const findedUser = await UsersModel.get(req.params.userId)
     if (findedUser) {
       res.json(findedUser);
     } else {

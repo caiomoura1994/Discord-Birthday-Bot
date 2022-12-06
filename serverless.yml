@@ -23,6 +23,8 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
+            - dynamodb:CreateTable
+            - dynamodb:DescribeTable
           Resource:
             - Fn::GetAtt: [ UsersTable, Arn ]
   environment:
