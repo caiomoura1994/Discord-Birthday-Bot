@@ -6,6 +6,9 @@ frameworkVersion: '3'
 custom:
   tableName: 'users-table-${sls:stage}'
 
+plugins:
+  - serverless-offline
+
 provider:
   name: aws
   runtime: nodejs14.x
@@ -38,6 +41,10 @@ resources:
       Properties:
         AttributeDefinitions:
           - AttributeName: userId
+            AttributeType: S
+          - AttributeName: name
+            AttributeType: S
+          - AttributeName: id
             AttributeType: S
         KeySchema:
           - AttributeName: userId
