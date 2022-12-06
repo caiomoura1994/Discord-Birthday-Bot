@@ -1,27 +1,16 @@
-const AWS = require("aws-sdk");
+const { default: { UsersModel } } = require("./models/users");
 const express = require("express");
 const serverless = require("serverless-http");
 
 const app = express();
 
-const USERS_TABLE = process.env.USERS_TABLE;
-const dynamoDbClient = new AWS.DynamoDB.DocumentClient();
-
 app.use(express.json());
 
 app.get("/users/:userId", async function (req, res) {
-  const params = {
-    TableName: USERS_TABLE,
-    Key: {
-      userId: req.params.userId,
-    },
-  };
-
   try {
-    const { Item } = await dynamoDbClient.get(params).promise();
-    if (Item) {
-      const { userId, name } = Item;
-      res.json({ userId, name });
+    const findedUser = await UsersModel.get(Number(req.params.userId))
+    if (findedUser) {
+      res.json(findedUser);
     } else {
       res
         .status(404)
@@ -41,17 +30,10 @@ app.post("/users", async function (req, res) {
     res.status(400).json({ error: '"name" must be a string' });
   }
 
-  const params = {
-    TableName: USERS_TABLE,
-    Item: {
-      userId: userId,
-      name: name,
-    },
-  };
-
   try {
-    await dynamoDbClient.put(params).promise();
-    res.json({ userId, name });
+    const createdUser = await UsersModel.create(req.body)
+    const findedUser = await UsersModel.get(createdUser.id)
+    res.json(findedUser);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Could not create user" });
