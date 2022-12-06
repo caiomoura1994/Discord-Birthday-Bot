@@ -32,7 +32,7 @@ app.post("/users", async function (req, res) {
 
   try {
     const createdUser = await UsersModel.create(req.body)
-    const findedUser = await UsersModel.get(createdUser.id)
+    const findedUser = await UsersModel.get(createdUser.userId)
     res.json(findedUser);
   } catch (error) {
     console.log(error);

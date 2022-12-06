@@ -40,14 +40,18 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
+          # - AttributeName: wallet
+          #   AttributeType: S
           - AttributeName: userId
             AttributeType: S
           - AttributeName: name
             AttributeType: S
-          - AttributeName: id
-            AttributeType: S
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
+          # - AttributeName: wallet
+          #   KeyType: RANGE
+          - AttributeName: name
+            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:custom.tableName}
