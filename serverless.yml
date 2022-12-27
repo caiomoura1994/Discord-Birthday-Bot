@@ -8,6 +8,7 @@ custom:
 
 plugins:
   - serverless-offline
+  - serverless-dotenv-plugin
 
 provider:
   name: aws
@@ -29,8 +30,13 @@ provider:
             - Fn::GetAtt: [ UsersTable, Arn ]
   environment:
     USERS_TABLE: ${self:custom.tableName}
+    PUBLIC_KEY: 'bbdd71958be9dccdb0ddd9ec9a164f47c6e8b84357ccea52df0c1e0081824634'
 
 functions:
+  cronHandler:
+    handler: notifyBirthday.run
+    events:
+      - schedule: cron(0 15 * * ? *)
   api:
     handler: handler.handler
     events:
@@ -46,14 +52,14 @@ resources:
           #   AttributeType: S
           - AttributeName: userId
             AttributeType: S
-          - AttributeName: name
+          - AttributeName: birthday
             AttributeType: S
         KeySchema:
           - AttributeName: userId
             KeyType: HASH
           # - AttributeName: wallet
           #   KeyType: RANGE
-          - AttributeName: name
+          - AttributeName: birthday
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:custom.tableName}

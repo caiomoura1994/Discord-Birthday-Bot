@@ -1,46 +1,39 @@
-const { default: { UsersModel } } = require("./models/users");
+const nacl = require('tweetnacl');
 const express = require("express");
 const serverless = require("serverless-http");
+const { default: commandsHandler } = require("./commandsHandler");
 
 const app = express();
 
 app.use(express.json());
 
-app.get("/users/ok", async function (req, res) {
+app.get("/", async function (req, res) {
   res.json({ ok: true })
 });
-app.get("/users/:userId", async function (req, res) {
-  try {
-    const findedUser = await UsersModel.get(req.params.userId)
-    if (findedUser) {
-      res.json(findedUser);
-    } else {
-      res
-        .status(404)
-        .json({ error: 'Could not find user with provided "userId"' });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Could not retreive user" });
-  }
-});
 
-app.post("/users", async function (req, res) {
-  const { userId, name } = req.body;
-  if (typeof userId !== "string") {
-    res.status(400).json({ error: '"userId" must be a string' });
-  } else if (typeof name !== "string") {
-    res.status(400).json({ error: '"name" must be a string' });
-  }
+app.all("/discordInteractions", async function (req, res) {
+  const PUBLIC_KEY = process.env.PUBLIC_KEY;
+  const signature = req.headers['x-signature-ed25519']
+  const timestamp = req.headers['x-signature-timestamp'];
+  const strBody = JSON.stringify(req.body); // should be string, for successful sign
 
-  try {
-    const createdUser = await UsersModel.create(req.body)
-    const findedUser = await UsersModel.get(createdUser.userId)
-    res.json(findedUser);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Could not create user" });
+  const isVerified = nacl.sign.detached.verify(
+    Buffer.from(timestamp + strBody),
+    Buffer.from(signature, 'hex'),
+    Buffer.from(PUBLIC_KEY, 'hex')
+  );
+  if (!isVerified) {
+    return res
+      .status(401)
+      .json({ error: 'invalid request signature' });
   }
+  // Replying to ping (requirement 2.)
+  const body = req.body
+  if (body.type == 1) {
+    return res.json({ type: 1 });
+  }
+  if (body.data.name) return await commandsHandler[body.data.name](body)
+  res.status(404)
 });
 
 app.use((req, res, next) => {

@@ -1,0 +1,51 @@
+Authorization: {{$processEnv BOT_TOKEN}}
+
+# To set a new WEBHOOK
+POST https://discord.com/api/v10/channels/{{$processEnv CHANNEL_ID}}/webhooks HTTP/1.1
+{
+  "name": "birthdayWebhook"
+}
+
+# To register commands in discord
+POST https://discord.com/api/v8/applications/{{$processEnv APP_ID}}/guilds/{{$processEnv GUILD_ID}}/commands HTTP/1.1
+{
+	"name": "set",
+	"type": 1,
+	"description": "Cadastrar aniversário.",
+	"options": [
+		{
+			"name": "dia",
+			"description": "Dia do seu aniversário (DD).",
+			"type": 3,
+			"required": true
+		},
+		{
+			"name": "mes",
+			"description": "Mês do seu aniversário (MM)",
+			"type": 3,
+			"required": true
+		}
+	]
+}
+
+POST https://discord.com/api/v8/applications/{{$processEnv APP_ID}}/guilds/{{$processEnv GUILD_ID}}/commands HTTP/1.1
+{
+  "name": "delete",
+  "type": 1,
+  "description": "Deletar aniversário.",
+  "options": [
+        {
+          "name": "userId",
+          "description": "Caso seja de outro usuário, digite o id.",
+          "type": 3,
+          "required": false
+        }
+    ]
+}
+
+POST https://discord.com/api/v8/applications/{{$processEnv APP_ID}}/guilds/{{$processEnv GUILD_ID}}/commands HTTP/1.1
+{
+  "name": "list",
+  "type": 1,
+  "description": "Listar aniversários."
+}
